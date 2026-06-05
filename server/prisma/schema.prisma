@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USER ────────────────────────────────────────────
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  timezone     String   @default("Europe/Oslo")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  habits    Habit[]
+  notebooks Notebook[]
+  notes     Note[]
+  checkIns  CheckIn[]
+
+  @@map("users")
+}
+
+// ─── HABIT ───────────────────────────────────────────
+model Habit {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  color      String    @default("#7c6af7")
+  frequency  Frequency @default(DAILY)
+  isArchived Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkIns CheckIn[]
+
+  @@map("habits")
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  CUSTOM
+}
+
+// ─── CHECK-IN ────────────────────────────────────────
+model CheckIn {
+  id        String   @id @default(cuid())
+  habitId   String
+  userId    String
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+  @@map("check_ins")
+}
+
+// ─── NOTEBOOK ────────────────────────────────────────
+model Notebook {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  emoji     String   @default("📓")
+  color     String   @default("#7c6af7")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes Note[]
+
+  @@map("notebooks")
+}
+
+// ─── NOTE ────────────────────────────────────────────
+model Note {
+  id         String   @id @default(cuid())
+  userId     String
+  notebookId String
+  title      String
+  content    String   @db.Text
+  isStarred  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, notebookId])
+  @@map("notes")
+}
