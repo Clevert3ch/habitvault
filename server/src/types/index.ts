@@ -8,4 +8,5 @@ export interface AuthRequest extends Request {
     email: string
     name: string
   }
+  params: Record<string, string>
 }

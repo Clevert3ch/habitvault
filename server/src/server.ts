@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.routes'
+import habitRoutes from './routes/habit.routes' 
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ app.use(cookieParser())
 
 // Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/habits', habitRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
