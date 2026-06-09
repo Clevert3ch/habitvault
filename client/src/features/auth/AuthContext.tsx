@@ -29,9 +29,9 @@ export function AuthProvider({children}: {children: ReactNode} ) {
     // On mount, check if there is a valid session
     useEffect(() => {
         const token = localStorage.getItem('accessToken')
-        if(!token) {
-            setIsLoading(false)
-            return
+        if (!token) {
+        setIsLoading(false)  // no token, stop loading immediately
+    return
         }
 
     // Try to get current user with existing token
@@ -41,10 +41,11 @@ export function AuthProvider({children}: {children: ReactNode} ) {
     .finally(() => setIsLoading(false))
     },[])
 
-    const login = async( email: string, password: string) => {
-        const res = await authApi.login({email, password})
-        localStorage.setItem('accessToken', res.data.accessToken)
-        setUser(res.data.user)
+    //login
+    const login = async (email: string, password: string) => {
+    const res = await authApi.login({ email, password })
+    localStorage.setItem('accessToken', res.data.accessToken)
+    setUser(res.data.user)
     }
 
     const register = async( name: string, email: string, password: string) => {

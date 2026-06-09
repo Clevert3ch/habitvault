@@ -8,12 +8,13 @@ const api = axios.create({
 //-----request interceptor ----------
 // automatic attach the acess token to every request
 
-api.interceptors.request.use( config => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-        config.headers.Authorization = 'Bearer ${token}'
-    }
-    return config
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('accessToken')
+  console.log('Token from localStorage:', token)
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`  // a small error here crashed the whole thing :)))
+  }
+  return config
 })
 
 

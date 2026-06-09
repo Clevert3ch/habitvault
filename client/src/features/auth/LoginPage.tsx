@@ -12,19 +12,20 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+  e.preventDefault()
+  setError('')
+  setIsLoading(true)
 
-    try {
-        await login(email, password)
-        navigate('/app/dashboard')
-    }catch {
-        setError('Invalig email or password')
-    } finally {
-        setIsLoading(false)
-    }
+  try {
+    await login(email, password)
+    // Small delay to ensure localStorage is set before navigation
+    setTimeout(() => navigate('/app/dashboard'), 50)
+  } catch {
+    setError('Invalid email or password')
+  } finally {
+    setIsLoading(false)
   }
+}
    return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
