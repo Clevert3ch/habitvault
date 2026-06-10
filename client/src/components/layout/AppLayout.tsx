@@ -55,7 +55,7 @@ export default function AppLayout() {
         {/* User section */}
         <div className="p-3 border-t border-gray-800">
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
