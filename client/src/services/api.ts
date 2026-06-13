@@ -1,4 +1,5 @@
 import axios from 'axios'
+import AppLayout from '../components/layout/AppLayout'
 
 const api = axios.create({
     baseURL: 'http://localhost:3001/api',
@@ -79,6 +80,35 @@ export const habitsApi = {
   undoCheckIn: (id: string) => api.delete(`/habits/${id}/checkin`),
 }
 
+// notes: 
+
+export const notebooksApi = {
+    getAll: () => api.get('/notes/notebooks'),
+    
+    create:(data: { name: string; emoji?: string; color?: string }) =>
+    api.post('/notes/notebooks', data),
+
+  delete: (id: string) => api.delete(`/notes/notebooks/${id}`),
+}
+
+
+export const notesApi = {
+    getByNotebook: (notebookId: string) => 
+        api.get(`/notes?notebookId=${notebookId}`),
+
+    search: (query: string) => 
+        api.get(`/notes?search=${encodeURIComponent(query)}`),
+
+    create: (data: {notebookId: string; title: string; content?: string }) =>
+        api.post('/notes', data),
+
+    update: (id: string, data: { title?: string; content?: string }) =>
+         api.put(`/notes/${id}`, data),
+
+    toggleStar:(id: string) => api.patch(`/notes/${id}/star`),
+
+    delete:(id: string) => api.delete(`/notes/${id}`),
+}
 
 
 export default api

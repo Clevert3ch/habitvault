@@ -6,7 +6,6 @@ const navItems = [
   { to: '/app/habits', icon: '🔄', label: 'My Habits' },
   { to: '/app/progress', icon: '📊', label: 'Progress' },
   { to: '/app/calendar', icon: '📅', label: 'Calendar' },
-  { to: '/app/notebooks', icon: '📚', label: 'Notebooks' },
   { to: '/app/notes', icon: '📝', label: 'Notes' },
 ]
 

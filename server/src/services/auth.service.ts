@@ -24,7 +24,7 @@ interface TokenPayload {
 // ─── Token helpers ───────────────────────────────────
 
 export function generateAccessToken(payload: TokenPayload): string {
-  return jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '15m' })
+  return jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: '7d' })
 }
 
 export function generateRefreshToken(payload: TokenPayload): string {

@@ -30,3 +30,26 @@ export interface AuthResponse{
     user: User 
     accessToken: string
 }
+
+export interface Notebook {
+    id: string
+    userId: string
+    name: string
+    emoji: string
+    color: string
+    createdAt: string
+    updatedAt: string
+    _count?: { notes: number }
+}
+
+export interface Note {
+    id: string
+    userId: string
+    notebookId: string
+    title: string
+    content: string
+    isStarred: boolean
+    createdAt: string
+    updatedAt: string
+    notebook?: { name: string; emoji: string }
+}
