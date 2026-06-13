@@ -5,6 +5,7 @@ import LoginPage from '../features/auth/LoginPage'
 import RegisterPage from '../features/auth/RegisterPage'
 import DashboardPage from '../features/habits/DashboardPage'
 import NotesPage from '../features/notes/NotesPage'
+import HabitsPage from '../features/habits/HabitsPage'
 
 function ComingSoon({ page }: { page: string }) {
   return (
@@ -23,7 +24,7 @@ export default function Router() {
       <Route path="/app" element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="habits" element={<ComingSoon page="Habits" />} />
+          <Route path="habits" element={<HabitsPage />} />
           <Route path="progress" element={<ComingSoon page="Progress" />} />
           <Route path="calendar" element={<ComingSoon page="Calendar" />} />
           <Route path="notebooks" element={<ComingSoon page="Notebooks" />} />
