@@ -1,5 +1,5 @@
 import { Response } from 'express'
-import { regex, z } from 'zod'
+import { z } from 'zod'
 import { AuthRequest } from '../types'
 import {
   getUserHabits,
@@ -8,8 +8,8 @@ import {
   archiveHabit,
   checkInHabit,
   undoCheckIn,
+  getProgressStats,
 } from '../services/habit.service'
-import { BrotliDecompress } from 'node:zlib'
 
 
 //------ validation schemas-------
@@ -146,5 +146,21 @@ export async function undoCheckInHandler(
       return
     }
     res.status(500).json({error : 'Failed to undo check-in'})
+  }
+}
+
+
+import { getProgressStats } from '../services/habit.service'
+
+export async function getStats(
+  req: AuthRequest,
+  res: Response
+): Promise<void> {
+  try {
+    const stats = await getProgressStats(req.user!.id)
+    res.json(stats)
+  } catch (err) {
+    console.error('Stats error:', err)
+    res.status(500).json({ error: 'Failed to fetch stats' })
   }
 }

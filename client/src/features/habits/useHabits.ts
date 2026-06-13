@@ -89,3 +89,17 @@ export function useUndoCheckIn () {
 }
 
 // why the optimistic updates? so that it doesnt have to wait on the ser res before  UI updates. 
+
+
+export function useHabitStats() {
+  const { user } = useAuth()
+
+  return useQuery({
+    queryKey: ['habitStats'],
+    queryFn: async () => {
+      const res = await habitsApi.stats()
+      return res.data
+    },
+    enabled: !!user,
+  })
+}

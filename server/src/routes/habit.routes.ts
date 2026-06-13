@@ -7,6 +7,7 @@ import {
   archiveHabitHandler,
   checkInHandler,
   undoCheckInHandler,
+  getStats,
 } from '../controllers/habit.controller'
 
 const router = Router()
@@ -16,7 +17,7 @@ const router = Router()
 // we use router.use() to apply it to all routes in this file
 
 router.use(authenticate)
-
+router.get('/stats', getStats)
 router.get('/', getHabits)
 router.post('/', createHabitHandler)
 router.patch('/:id', updateHabitHandler)

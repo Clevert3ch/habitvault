@@ -78,6 +78,7 @@ export const habitsApi = {
   checkIn: (id: string) => api.post(`/habits/${id}/checkin`),
 
   undoCheckIn: (id: string) => api.delete(`/habits/${id}/checkin`),
+  stats: () => api.get('/habits/stats'),
 }
 
 // notes: 

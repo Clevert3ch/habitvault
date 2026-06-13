@@ -1,4 +1,4 @@
-import { MockPropertyContext } from 'node:test'
+
 import { prisma } from '../lib/prisma'
 
 // ---- types ---- 
@@ -208,4 +208,113 @@ function calculateStreak(dates: Date[]): number {
 
     return streak
 
+}
+
+
+
+// Stat for progress page 
+
+
+export async function getProgressStats(userId: string) {
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+
+  //last 7 days 
+  const sevenDaysAgo = new Date(now)
+  sevenDaysAgo.setDate(now.getDate() - 6)
+
+  //last 30 days 
+
+  const thirtyDaysAgo = new Date(now)
+  thirtyDaysAgo.setDate(now.getDate() - 29)
+  // get all habits for this user 
+
+  const habits = await prisma.habit.findMany({
+    where: { userId, isArchived: false },
+    select: { id: true, name: true, color: true },
+  })
+
+
+  const habitCount = habits.length
+
+  if (habitCount === 0) {
+    return {
+      habits,
+      dailyCompletions: [],
+      perHabitStats: [],
+      totalCheckIns: 0,
+      perfectDays: 0,
+      currentStreak: 0,
+    }
+  }
+
+  //get all check-ins in the last 30 days 
+
+  const checkIns = await prisma.checkIn.findMany({
+    where: {
+      userId,
+      date: { gte: thirtyDaysAgo },
+    },
+    select: { habitId: true, date: true },
+    orderBy: { date: 'asc' },
+  })
+
+  //Group check-ins by date
+  //Aggrevating data when SQL grouby is overkill : 
+
+  const byDate = checkIns.reduce<Record<string, number>>((acc, c) => {
+    const key = new Date(c.date).toISOString().split('T')[0]
+    acc[key] = (acc[key] ?? 0) + 1
+    return acc
+  }, {})
+
+   //build last 7 days completion data for the chart bar. 
+   const dailyCompletions = Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(now)
+    day.setDate(now.getDate() - (6 - i))
+    const key = day.toISOString().split('T')[0]
+    const completed = byDate[key] ?? 0
+    return {
+      date: day.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }),
+      completed,
+      total: habitCount,
+      percentage: Math.round((completed / habitCount) * 100),
+    }
+  })
+
+  
+
+
+   // per habit completion rate over last 30 days 
+   const perHabitStats = habits.map(habit => {
+    const habitCheckIns = checkIns.filter(c => c.habitId === habit.id)
+    return {
+      id: habit.id,
+      name: habit.name,
+      color: habit.color,
+      completions: habitCheckIns.length,
+      rate: Math.round((habitCheckIns.length / 30) * 100),
+    }
+  })
+//Perfect days -  days where ALL habits were completed 
+   const perfectDays = Object.values(byDate).filter(
+    count => count >= habitCount
+  ).length
+
+
+  
+
+   //total check-ins ever
+   const totalCheckIns = await prisma.checkIn.count({
+    where: { userId },
+   })
+
+   return {
+    habits,
+    dailyCompletions,
+    perHabitStats,
+    totalCheckIns,
+    perfectDays,
+    currentStreak: 0,
+  }
 }
