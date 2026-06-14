@@ -1,5 +1,7 @@
-import { Router } from 'express'
-import { authenticate } from '../middleware/auth.middleware'
+import { Router } from "express";
+import { authenticate } from "../middleware/auth.middleware";
+import { getCalendar } from "../controllers/habit.controller";
+
 import {
   getHabits,
   createHabitHandler,
@@ -8,21 +10,22 @@ import {
   checkInHandler,
   undoCheckInHandler,
   getStats,
-} from '../controllers/habit.controller'
+} from "../controllers/habit.controller";
 
-const router = Router()
+const router = Router();
 
 // All habit routes require authentication
 // Instead of adding authenticate to every line,
 // we use router.use() to apply it to all routes in this file
 
-router.use(authenticate)
-router.get('/stats', getStats)
-router.get('/', getHabits)
-router.post('/', createHabitHandler)
-router.patch('/:id', updateHabitHandler)
-router.delete('/:id', archiveHabitHandler)
-router.post('/:id/checkin', checkInHandler)
-router.delete('/:id/checkin', undoCheckInHandler)
+router.use(authenticate);
+router.get("/stats", getStats);
+router.get("/", getHabits);
+router.get("/calendar", getCalendar);
+router.post("/", createHabitHandler);
+router.patch("/:id", updateHabitHandler);
+router.delete("/:id", archiveHabitHandler);
+router.post("/:id/checkin", checkInHandler);
+router.delete("/:id/checkin", undoCheckInHandler);
 
-export default router
+export default router;
