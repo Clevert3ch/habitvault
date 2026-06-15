@@ -116,3 +116,15 @@ export function useCalendar(month: string) {
     enabled: !!user,
   });
 }
+
+export function useArchiveHabit() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => habitsApi.archive(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habits"] });
+      queryClient.invalidateQueries({ queryKey: ["habitStats"] });
+    },
+  });
+}
