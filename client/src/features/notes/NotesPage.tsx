@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   useNotebooks,
   useCreateNotebook,
@@ -8,9 +8,10 @@ import {
   useUpdateNote,
   useToggleStar,
   useDeleteNote,
-} from './useNotes'
-import type { Notebook, Note } from '../../types'
-import ReactMarkdown from 'react-markdown'
+  useDeleteNotebook,
+} from "./useNotes";
+import type { Notebook, Note } from "../../types";
+import ReactMarkdown from "react-markdown";
 
 // ─── Notebook sidebar item ───────────────────────────
 
@@ -18,18 +19,20 @@ function NotebookItem({
   notebook,
   isActive,
   onClick,
+  onDelete,
 }: {
-  notebook: Notebook
-  isActive: boolean
-  onClick: () => void
+  notebook: Notebook;
+  isActive: boolean;
+  onClick: () => void;
+  onDelete: (e: React.MouseEvent) => void;
 }) {
   return (
-    <button
+    <div
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+      className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left cursor-pointer transition-colors ${
         isActive
-          ? 'bg-violet-600/20 text-violet-300'
-          : 'text-gray-400 hover:text-white hover:bg-gray-800'
+          ? "bg-violet-600/20 text-violet-300"
+          : "text-gray-400 hover:text-white hover:bg-gray-800"
       }`}
     >
       <span className="text-lg">{notebook.emoji}</span>
@@ -39,8 +42,14 @@ function NotebookItem({
           {notebook._count?.notes ?? 0} notes
         </p>
       </div>
-    </button>
-  )
+      <button
+        onClick={onDelete}
+        className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all text-sm"
+      >
+        ✕
+      </button>
+    </div>
+  );
 }
 
 // ─── Note card ───────────────────────────────────────
@@ -51,18 +60,18 @@ function NoteCard({
   onClick,
   onStar,
 }: {
-  note: Note
-  isActive: boolean
-  onClick: () => void
-  onStar: (e: React.MouseEvent) => void
+  note: Note;
+  isActive: boolean;
+  onClick: () => void;
+  onStar: (e: React.MouseEvent) => void;
 }) {
   return (
     <div
       onClick={onClick}
       className={`p-4 rounded-xl border cursor-pointer transition-all ${
         isActive
-          ? 'border-violet-500/40 bg-violet-600/5'
-          : 'border-gray-800 hover:border-gray-700 bg-gray-900'
+          ? "border-violet-500/40 bg-violet-600/5"
+          : "border-gray-800 hover:border-gray-700 bg-gray-900"
       }`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
@@ -73,46 +82,54 @@ function NoteCard({
           onClick={onStar}
           className="flex-shrink-0 text-base leading-none"
         >
-          {note.isStarred ? '⭐' : '☆'}
+          {note.isStarred ? "⭐" : "☆"}
         </button>
       </div>
       <p className="text-gray-500 text-xs line-clamp-2 mb-2">
-        {note.content || 'Empty note'}
+        {note.content || "Empty note"}
       </p>
       <p className="text-gray-600 text-xs">
-        {new Date(note.updatedAt).toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'short',
+        {new Date(note.updatedAt).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
         })}
       </p>
     </div>
-  )
+  );
 }
 
 // ─── Note editor ─────────────────────────────────────
 
-function NoteEditor({ note }: { note: Note }) {
-  const [title, setTitle] = useState(note.title)
-  const [content, setContent] = useState(note.content)
-  const [isPreview, setIsPreview] = useState(false)
-  const updateNote = useUpdateNote()
+function NoteEditor({ note, onDelete }: { note: Note; onDelete: () => void }) {
+  const [title, setTitle] = useState(note.title);
+  const [content, setContent] = useState(note.content);
+  const [isPreview, setIsPreview] = useState(false);
+  const updateNote = useUpdateNote();
+  const deleteNote = useDeleteNote();
+
+  // handle delete note
+  const handleDelete = () => {
+    if (confirm("Delete this note? This cannot be undoe")) {
+      deleteNote.mutate(note.id, { onSuccess: onDelete });
+    }
+  };
 
   // Reset when note changes
   useEffect(() => {
-    setTitle(note.title)
-    setContent(note.content)
-  }, [note.id])
+    setTitle(note.title);
+    setContent(note.content);
+  }, [note.id]);
 
   // Auto-save after 1 second of no typing
   useEffect(() => {
     const timer = setTimeout(() => {
       if (title !== note.title || content !== note.content) {
-        updateNote.mutate({ id: note.id, data: { title, content } })
+        updateNote.mutate({ id: note.id, data: { title, content } });
       }
-    }, 1000)
+    }, 1000);
 
-    return () => clearTimeout(timer)
-  }, [title, content])
+    return () => clearTimeout(timer);
+  }, [title, content]);
 
   return (
     <div className="flex flex-col h-full">
@@ -120,7 +137,7 @@ function NoteEditor({ note }: { note: Note }) {
       <div className="flex items-center justify-between mb-4">
         <input
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
           className="flex-1 bg-transparent text-white text-xl font-bold outline-none placeholder-gray-600"
           placeholder="Note title..."
         />
@@ -135,11 +152,17 @@ function NoteEditor({ note }: { note: Note }) {
             onClick={() => setIsPreview(!isPreview)}
             className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
               isPreview
-                ? 'bg-violet-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:text-white'
+                ? "bg-violet-600 text-white"
+                : "bg-gray-800 text-gray-400 hover:text-white"
             }`}
           >
-            {isPreview ? 'Edit' : 'Preview'}
+            {isPreview ? "Edit" : "Preview"}
+          </button>
+          <button
+            onClick={handleDelete}
+            className="px-3 py-1 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+          >
+            Delete
           </button>
         </div>
       </div>
@@ -152,43 +175,46 @@ function NoteEditor({ note }: { note: Note }) {
       ) : (
         <textarea
           value={content}
-          onChange={e => setContent(e.target.value)}
+          onChange={(e) => setContent(e.target.value)}
           placeholder="Start writing... (Markdown supported)"
           className="flex-1 bg-transparent text-gray-300 text-sm leading-relaxed outline-none resize-none placeholder-gray-600"
         />
       )}
     </div>
-  )
+  );
 }
 
 // ─── Create notebook modal ───────────────────────────
 
 const NOTEBOOK_COLORS = [
-  '#7c6af7', '#4ade80', '#fbbf24', '#f87171', '#2dd4bf', '#f472b6',
-]
-const NOTEBOOK_EMOJIS = ['📓', '⚛️', '🛠️', '🗄️', '💡', '🎯', '📐', '🔬']
+  "#7c6af7",
+  "#4ade80",
+  "#fbbf24",
+  "#f87171",
+  "#2dd4bf",
+  "#f472b6",
+];
+const NOTEBOOK_EMOJIS = ["📓", "⚛️", "🛠️", "🗄️", "💡", "🎯", "📐", "🔬"];
 
 function CreateNotebookModal({ onClose }: { onClose: () => void }) {
-  const [name, setName] = useState('')
-  const [emoji, setEmoji] = useState('📓')
-  const [color, setColor] = useState('#7c6af7')
-  const createNotebook = useCreateNotebook()
+  const [name, setName] = useState("");
+  const [emoji, setEmoji] = useState("📓");
+  const [color, setColor] = useState("#7c6af7");
+  const createNotebook = useCreateNotebook();
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim()) return
+    e.preventDefault();
+    if (!name.trim()) return;
     createNotebook.mutate(
       { name, emoji, color },
-      { onSuccess: () => onClose() }
-    )
-  }
+      { onSuccess: () => onClose() },
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md">
-        <h2 className="text-white font-bold text-lg mb-6">
-          Create notebook
-        </h2>
+        <h2 className="text-white font-bold text-lg mb-6">Create notebook</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-gray-400 text-sm font-medium mb-2">
@@ -197,7 +223,7 @@ function CreateNotebookModal({ onClose }: { onClose: () => void }) {
             <input
               autoFocus
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder="e.g. React Notes"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
             />
@@ -207,15 +233,15 @@ function CreateNotebookModal({ onClose }: { onClose: () => void }) {
               Emoji
             </label>
             <div className="flex gap-2 flex-wrap">
-              {NOTEBOOK_EMOJIS.map(e => (
+              {NOTEBOOK_EMOJIS.map((e) => (
                 <button
                   key={e}
                   type="button"
                   onClick={() => setEmoji(e)}
                   className={`w-10 h-10 rounded-lg text-xl transition-all ${
                     emoji === e
-                      ? 'bg-violet-600/30 ring-2 ring-violet-500'
-                      : 'bg-gray-800 hover:bg-gray-700'
+                      ? "bg-violet-600/30 ring-2 ring-violet-500"
+                      : "bg-gray-800 hover:bg-gray-700"
                   }`}
                 >
                   {e}
@@ -228,15 +254,15 @@ function CreateNotebookModal({ onClose }: { onClose: () => void }) {
               Color
             </label>
             <div className="flex gap-3">
-              {NOTEBOOK_COLORS.map(c => (
+              {NOTEBOOK_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
                   className={`w-8 h-8 rounded-full transition-transform ${
                     color === c
-                      ? 'scale-125 ring-2 ring-white ring-offset-2 ring-offset-gray-900'
-                      : 'hover:scale-110'
+                      ? "scale-125 ring-2 ring-white ring-offset-2 ring-offset-gray-900"
+                      : "hover:scale-110"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -256,74 +282,79 @@ function CreateNotebookModal({ onClose }: { onClose: () => void }) {
               disabled={createNotebook.isPending}
               className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white font-medium rounded-lg py-2.5 transition-colors"
             >
-              {createNotebook.isPending ? 'Creating...' : 'Create'}
+              {createNotebook.isPending ? "Creating..." : "Create"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Notes page ──────────────────────────────────────
 
 export default function NotesPage() {
-  const [selectedNotebook, setSelectedNotebook] =
-    useState<Notebook | null>(null)
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null)
-  const [search, setSearch] = useState('')
-  const [showNotebookModal, setShowNotebookModal] = useState(false)
+  const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(
+    null,
+  );
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [search, setSearch] = useState("");
+  const [showNotebookModal, setShowNotebookModal] = useState(false);
+  const deleteNotebook = useDeleteNotebook();
 
-  const { data: notebooks, isLoading: notebooksLoading, refetch } = useNotebooks()
- 
-  const { data: notes } = useNotes(selectedNotebook?.id ?? null)
-  const { data: searchResults } = useSearchNotes(search)
-  const createNote = useCreateNote()
-  const toggleStar = useToggleStar()
+  const {
+    data: notebooks,
+    isLoading: notebooksLoading,
+    refetch,
+  } = useNotebooks();
+
+  const { data: notes } = useNotes(selectedNotebook?.id ?? null);
+  const { data: searchResults } = useSearchNotes(search);
+  const createNote = useCreateNote();
+  const toggleStar = useToggleStar();
 
   // Auto-select first notebook
   useEffect(() => {
     if (notebooks && notebooks.length > 0 && !selectedNotebook) {
-      setSelectedNotebook(notebooks[0])
+      setSelectedNotebook(notebooks[0]);
     }
-  }, [notebooks])
+  }, [notebooks]);
 
   // Auto-select first note when notebook changes
   useEffect(() => {
     if (notes && notes.length > 0) {
-      setSelectedNote(notes[0])
+      setSelectedNote(notes[0]);
     } else {
-      setSelectedNote(null)
+      setSelectedNote(null);
     }
-  }, [notes, selectedNotebook])
+  }, [notes, selectedNotebook]);
 
   const handleCreateNote = () => {
-    if (!selectedNotebook) return
+    if (!selectedNotebook) return;
     createNote.mutate(
       {
         notebookId: selectedNotebook.id,
-        title: 'Untitled note',
-        content: '',
+        title: "Untitled note",
+        content: "",
       },
       {
-        onSuccess: data => setSelectedNote(data.data),
-      }
-    )
-  }
+        onSuccess: (data) => setSelectedNote(data.data),
+      },
+    );
+  };
 
-  const displayedNotes = search.length > 1 ? searchResults : notes
+  const displayedNotes = search.length > 1 ? searchResults : notes;
 
   if (notebooksLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <p className="text-gray-400">Loading notebooks...</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] -m-8">
-
       {/* Notebooks sidebar */}
       <div className="w-52 bg-gray-900 border-r border-gray-800 flex flex-col flex-shrink-0">
         <div className="p-4 border-b border-gray-800 flex items-center justify-between">
@@ -341,14 +372,26 @@ export default function NotesPage() {
               No notebooks yet
             </p>
           )}
-          {notebooks?.map(nb => (
+          {notebooks?.map((nb) => (
             <NotebookItem
               key={nb.id}
               notebook={nb}
               isActive={selectedNotebook?.id === nb.id}
               onClick={() => {
-                setSelectedNotebook(nb)
-                setSearch('')
+                setSelectedNotebook(nb);
+                setSearch("");
+              }}
+              onDelete={(e) => {
+                e.stopPropagation();
+                if (confirm(`Delete "${nb.name}" and all its notes?`)) {
+                  deleteNotebook.mutate(nb.id, {
+                    onSuccess: () => {
+                      if (selectedNotebook?.id === nb.id) {
+                        setSelectedNotebook(null);
+                      }
+                    },
+                  });
+                }
               }}
             />
           ))}
@@ -361,8 +404,8 @@ export default function NotesPage() {
           <div className="flex items-center justify-between">
             <span className="text-white text-sm font-semibold">
               {search.length > 1
-                ? 'Search results'
-                : selectedNotebook?.name ?? 'Notes'}
+                ? "Search results"
+                : (selectedNotebook?.name ?? "Notes")}
             </span>
             {selectedNotebook && (
               <button
@@ -376,7 +419,7 @@ export default function NotesPage() {
           {/* Search */}
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search notes..."
             className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
           />
@@ -384,18 +427,18 @@ export default function NotesPage() {
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {displayedNotes?.length === 0 && (
             <p className="text-gray-500 text-xs text-center py-8">
-              {search.length > 1 ? 'No results found' : 'No notes yet'}
+              {search.length > 1 ? "No results found" : "No notes yet"}
             </p>
           )}
-          {displayedNotes?.map(note => (
+          {displayedNotes?.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
               isActive={selectedNote?.id === note.id}
               onClick={() => setSelectedNote(note)}
-              onStar={e => {
-                e.stopPropagation()
-                toggleStar.mutate(note.id)
+              onStar={(e) => {
+                e.stopPropagation();
+                toggleStar.mutate(note.id);
               }}
             />
           ))}
@@ -405,13 +448,17 @@ export default function NotesPage() {
       {/* Editor */}
       <div className="flex-1 overflow-hidden p-8">
         {selectedNote ? (
-          <NoteEditor key={selectedNote.id} note={selectedNote} />
+          <NoteEditor
+            key={selectedNote.id}
+            note={selectedNote}
+            onDelete={() => setSelectedNote(null)}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <p className="text-gray-500 mb-4">
               {selectedNotebook
-                ? 'No note selected'
-                : 'Select a notebook to get started'}
+                ? "No note selected"
+                : "Select a notebook to get started"}
             </p>
             {selectedNotebook && (
               <button
@@ -429,5 +476,5 @@ export default function NotesPage() {
         <CreateNotebookModal onClose={() => setShowNotebookModal(false)} />
       )}
     </div>
-  )
+  );
 }

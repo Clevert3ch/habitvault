@@ -39,13 +39,27 @@ export async function getUserHabits(userId: string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return habits.map((habit) => ({
-    ...habit,
-    isCheckedToday: habit.checkIns.some(
-      (c) => new Date(c.date).toDateString() === today.toDateString(),
-    ),
-    streak: calculateStreak(habit.checkIns.map((c) => c.date)),
-  }));
+  return habits.map((habit) => {
+    // Compare dates as YYYY-MM-DD strings in UTC to avoid timezone issues
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    // DEBUG
+    console.log("todayStr:", todayStr);
+    habit.checkIns.forEach((c) => {
+      console.log(
+        "  checkIn date:",
+        new Date(c.date).toISOString().split("T")[0],
+      );
+    });
+
+    return {
+      ...habit,
+      isCheckedToday: habit.checkIns.some(
+        (c) => new Date(c.date).toISOString().split("T")[0] === todayStr,
+      ),
+      streak: calculateStreak(habit.checkIns.map((c) => c.date)),
+    };
+  });
 }
 
 //----- Create a habit -------------
@@ -114,7 +128,7 @@ export async function checkInHabit(habitId: string, userId: string) {
     throw new Error("HABIT_NOT_FOUND");
   }
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
 
   // the @@unique ([habitId, date] ) in our scheme prevents duplicates at the database level, but we give a friendlier error here
 
