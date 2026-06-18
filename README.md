@@ -245,7 +245,3 @@ A few bugs that taught the most:
 - Deployment (currently runs locally)
 
 ---
-
-## License
-
-MIT
