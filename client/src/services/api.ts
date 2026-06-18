@@ -56,6 +56,11 @@ export const authApi = {
   me: () => api.get("/auth/me"),
 
   logout: () => api.post("/auth/logout"),
+
+  updateProfile: (data: { name?: string; timezone?: string }) =>
+    api.patch("/auth/me", data),
+
+  stats: () => api.get("/auth/stats"),
 };
 
 //---- Habits ---------

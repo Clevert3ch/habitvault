@@ -8,6 +8,7 @@ import NotesPage from "../features/notes/NotesPage";
 import HabitsPage from "../features/habits/HabitsPage";
 import ProgressPage from "../features/habits/ProgressPage";
 import CalendarPage from "../features/habits/CalendarPage";
+import ProfilePage from "../features/auth/ProfilePage";
 
 function ComingSoon({ page }: { page: string }) {
   return (
@@ -25,6 +26,7 @@ export default function Router() {
 
       <Route path="/app" element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="habits" element={<HabitsPage />} />
           <Route path="progress" element={<ProgressPage />} />
