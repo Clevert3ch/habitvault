@@ -109,7 +109,7 @@ function NoteEditor({ note, onDelete }: { note: Note; onDelete: () => void }) {
 
   // handle delete note
   const handleDelete = () => {
-    if (confirm("Delete this note? This cannot be undoe")) {
+    if (confirm("Delete this note? This cannot be undone")) {
       deleteNote.mutate(note.id, { onSuccess: onDelete });
     }
   };
