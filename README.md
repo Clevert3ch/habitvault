@@ -1,6 +1,6 @@
 # HabitVault
 
-![Demo](./public/)comming soon
+![Demo](./public/Habitvault.gif)comming soon
 
 A full-stack personal productivity app combining habit tracking and note-taking, built from scratch as a deep-dive into full-stack TypeScript development.
 
